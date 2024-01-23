@@ -1,0 +1,7 @@
+*.exe
+nssm-2.24/
+nssm-2.24.zip
+build/
+dist/
+internet_speed.csv
+*.spec

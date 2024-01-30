@@ -3,7 +3,7 @@ import csv
 import os
 import time
 import subprocess
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import matplotlib.pyplot as plt
 import psutil
 
@@ -47,15 +47,15 @@ def generate_daily_graph():
     with open("internet_speed.csv", "r") as file:
         reader = csv.reader(file)
         for row in reader:
-            time_str, download, upload, ping = row
-            time_obj = datetime.fromisoformat(time_str)
-            # Solo incluir datos del día actual
-            if time_obj.date() == date.today():
+            if "Timestamp" in row:
+                continue
+            else:
+                time_str, network_name, download, upload, ping = row
+                time_obj = datetime.fromisoformat(time_str)
                 times.append(time_obj)
                 downloads.append(float(download))
                 uploads.append(float(upload))
                 pings.append(float(ping))
-
     plt.figure(figsize=(10, 6))
     plt.plot(times, downloads, label='Download (Mbps)')
     plt.plot(times, uploads, label='Upload (Mbps)')
@@ -63,7 +63,7 @@ def generate_daily_graph():
     plt.ylabel('Velocidad (Mbps)')
     plt.title('Velocidad de Internet durante el Día')
     plt.legend()
-    plt.savefig(f"internet_speed_{date.today()}.png")
+    plt.savefig(f"internet_speed_{str(date.today())}.png")
     plt.close()
 
 # Intervalo de tiempo en segundos (por ejemplo, una hora = 3600 segundos)
@@ -74,10 +74,9 @@ print("Processing...")
 print("Press Ctrl+C to stop the program")
 while True:
     current_day = date.today()
-    if last_day_checked != current_day:
+    if not os.path.exists(f"internet_speed_{str(date.today())}.png"):
         generate_daily_graph()
         last_day_checked = current_day
-
     download_speed, upload_speed, ping = test_speed()
     network_name = get_network_name()
     write_to_csv(network_name, download_speed, upload_speed, ping)
